@@ -172,6 +172,18 @@ jobs:
       - name: Smoke test packaged macOS app
         if: matrix.platform == 'darwin'
         run: node scripts/smoke-desktop.mjs "desktop/electron/dist/mac-arm64/SSH Manager.app/Contents/MacOS/SSH Manager"
+      - name: Verify community macOS resource signatures and ZIP contents
+        if: matrix.platform == 'darwin'
+        shell: bash
+        run: |
+          for app in desktop/electron/dist/mac*/*.app; do codesign --verify --deep --strict "$app"; done
+          for archive in desktop/electron/dist/*.zip; do
+            check="$RUNNER_TEMP/verify-$(basename "$archive" .zip)"
+            mkdir -p "$check"
+            ditto -x -k "$archive" "$check"
+            codesign --verify --deep --strict "$check/SSH Manager.app"
+            rm -rf "$check"
+          done
       # Run AFTER the smoke test: ordinary use must preserve the signature.
       - name: Verify macOS distribution
         if: matrix.platform == 'darwin' && env.MAC_CERT != ''

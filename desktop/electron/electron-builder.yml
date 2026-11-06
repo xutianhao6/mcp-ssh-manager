@@ -79,6 +79,8 @@ extraResources:
       - '!**/.bin/**'
 
 mac:
+  # Seal community builds with an ad-hoc signature; this is not Developer ID or notarization.
+  identity: "-"
   files:
     - '!node_modules/node-pty/prebuilds/win32-*/**'
   category: public.app-category.developer-tools

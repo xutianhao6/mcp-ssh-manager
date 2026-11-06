@@ -9,3 +9,5 @@
 This fork is an independent community build. It is not signed or notarized with the upstream maintainer's Apple/Windows certificates. macOS and Windows may display an operating system trust prompt. Verify downloads against the platform's release-manifest JSON SHA-256 values. Do not treat this fork as an official upstream release.
 
 本版本未使用上游维护者的 Apple / Windows 签名证书，也未经 Apple 公证。系统可能提示来源验证。各平台提供 SHA-256 清单。服务器地址、命令、日志和远程输出保留原文。
+
+macOS apps carry an ad-hoc resource signature verified after packaging and again after ZIP extraction in CI. This protects bundle integrity but does not provide a trusted developer identity or Apple notarization.
