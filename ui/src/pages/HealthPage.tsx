@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
 import { AlertTriangle, HeartPulse, Loader2, RefreshCw, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { health, thresholds as thresholdsApi, type HealthResult, type Thresholds } from '@/lib/api';
+import { health, thresholds as thresholdsApi, type HealthAlert, type HealthResult, type Thresholds } from '@/lib/api';
 import { ensurePermission } from '@/lib/notify';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { EmptyState } from '@/components/layout/EmptyState';
@@ -31,6 +31,14 @@ function severity(percent: number, threshold: number): 'over' | 'near' | 'ok' {
 const BAR = { over: 'bg-destructive', near: 'bg-warning', ok: 'bg-meter' } as const;
 const TEXT = { over: 'text-destructive', near: 'text-warning', ok: '' } as const;
 
+function alertMessage(alert: HealthAlert): string {
+  const values = { value: alert.value, threshold: alert.threshold, mount: alert.mount ?? '/' };
+  if (alert.type === 'disk') return tr('Disk {{mount}}: {{value}}% used (threshold {{threshold}}%)', values);
+  if (alert.type === 'memory') return tr('Memory: {{value}}% used (threshold {{threshold}}%)', values);
+  if (alert.type === 'cpu') return tr('CPU: {{value}}% used (threshold {{threshold}}%)', values);
+  return alert.message;
+}
+
 function Gauge({ label, percent, detail, threshold, mono }:
   { label: string; percent?: number; detail?: string; threshold: number; mono?: boolean }) {
   useLocale();
@@ -38,9 +46,9 @@ function Gauge({ label, percent, detail, threshold, mono }:
   const clamped = Math.max(0, Math.min(100, Math.round(percent)));
   const level = severity(clamped, threshold);
   return (
-    <div className="grid gap-1.5">
-      <div className={cn('flex items-baseline justify-between gap-3 text-[13px]', TEXT[level])}>
-        <span className={cn('min-w-0 truncate', mono && 'font-mono', level !== 'ok' && 'font-bold')}>{label}</span>
+    <div className="health-gauge grid min-w-0 grid-cols-[minmax(0,1fr)] gap-1.5">
+      <div className={cn('grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-baseline gap-3 text-[13px]', TEXT[level])}>
+        <span className={cn('min-w-0 [overflow-wrap:anywhere]', mono && 'font-mono', level !== 'ok' && 'font-bold')}>{label}</span>
         <span className="font-bold tabular-nums">{clamped}%</span>
       </div>
       <div className="h-1.5 overflow-hidden rounded-full bg-sunk">
@@ -48,9 +56,9 @@ function Gauge({ label, percent, detail, threshold, mono }:
           style={{ width: `${clamped}%` }} />
       </div>
       {detail && (
-        <p className="text-xs text-muted-foreground">
+        <p className="min-w-0 text-xs text-muted-foreground [overflow-wrap:anywhere]">
           {detail}
-          {level !== 'ok' && tr(" · over the {{v0}}% threshold", { v0: threshold })}
+          {level !== 'ok' && tr(' · at or above the {{v0}}% threshold', { v0: threshold })}
         </p>
       )}
     </div>
@@ -58,7 +66,8 @@ function Gauge({ label, percent, detail, threshold, mono }:
 }
 
 export function HealthPage() {
-  useLocale();
+  const language = useLocale();
+  const number = (value: number) => new Intl.NumberFormat(language, { maximumFractionDigits: 1 }).format(value);
   const [results, setResults] = useState<HealthResult[] | null>(null);
   const [probing, setProbing] = useState(false);
   const [limits, setLimits] = useState<Thresholds>({ cpu: 80, memory: 90, disk: 85, enabled: true });
@@ -83,8 +92,8 @@ export function HealthPage() {
       const crossed = answer.results.filter(r => (r.alerts?.length ?? 0) > 0);
       if (crossed.length > 0 && await ensurePermission()) {
         for (const machine of crossed) {
-          new Notification(`${machine.server}: ${machine.alerts![0].type} over threshold`, {
-            body: machine.alerts!.map(a => a.message).join('\n'),
+          new Notification(tr('{{server}}: resource threshold reached', { server: machine.server }), {
+            body: machine.alerts!.map(alertMessage).join('\n'),
             tag: `health:${machine.server}`,
           });
         }
@@ -99,7 +108,7 @@ export function HealthPage() {
   const unreachable = (results?.length ?? 0) - reachable;
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
+    <div className="flex h-full min-h-0 min-w-0 flex-col">
       <PageHeader
         title={tr("Health")}
         count={results?.length}
@@ -110,7 +119,7 @@ export function HealthPage() {
         }
       />
 
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-8 pb-10 pt-5">
+      <div className="health-scroll flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto px-4 pb-10 pt-5 sm:px-8">
         {/* The verdict before the detail: three counts you can read from the
             door, then the cards that explain them. */}
         {results !== null && results.length > 0 && (
@@ -139,10 +148,10 @@ export function HealthPage() {
             hint={tr("Each check opens one SSH connection and closes it. Press the button when you want to know.")}
           />
         ) : (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-4">
+          <div className="health-grid grid min-w-0 grid-cols-[repeat(auto-fill,minmax(min(100%,300px),1fr))] items-start gap-4">
             {results.map(result => (
-              <article key={result.server} className="flex flex-col rounded-xl border border-border bg-card">
-                <div className="flex items-center gap-2.5 px-4 pb-3 pt-3.5">
+              <article key={result.server} className="health-card flex min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-card">
+                <div className="flex min-w-0 items-center gap-2.5 px-4 pb-3 pt-3.5">
                   <h2 className="min-w-0 truncate text-base font-bold">{result.server}</h2>
                   <span className={cn(
                     'inline-flex h-6 shrink-0 items-center rounded-md px-2 text-xs font-bold',
@@ -152,7 +161,7 @@ export function HealthPage() {
                   </span>
                   <button
                     type="button"
-                    aria-label={`Recheck ${result.server}`}
+                    aria-label={tr('Recheck {{server}}', { server: result.server })}
                     title={tr("Recheck")}
                     disabled={probing}
                     className="ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:opacity-50"
@@ -163,28 +172,28 @@ export function HealthPage() {
                 </div>
 
                 {result.reachable ? (
-                  <div className="grid gap-3.5 px-4 pb-4">
+                  <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-3.5 px-4 pb-4">
                     {(result.alerts?.length ?? 0) > 0 && (
-                      <div className="rounded-lg bg-warning-light px-3 py-2 text-warning">
+                      <div className="min-w-0 rounded-lg bg-warning-light px-3 py-2 text-warning">
                         {result.alerts!.map(alert => (
-                          <p key={alert.type} className="flex items-start gap-1.5 text-xs font-medium">
+                          <p key={`${alert.type}:${alert.mount ?? ''}`} className="flex min-w-0 items-start gap-1.5 text-xs font-medium">
                             <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                            {alert.message}
+                            <span className="min-w-0 [overflow-wrap:anywhere]">{alertMessage(alert)}</span>
                           </p>
                         ))}
                       </div>
                     )}
                     <Gauge label="CPU" percent={result.cpu?.percent} threshold={limits.cpu}
-                      detail={result.load_average ? `load ${result.load_average}` : undefined} />
+                      detail={result.load_average ? tr('Load average: {{value}}', { value: result.load_average }) : undefined} />
                     <Gauge label={tr("Memory")} percent={result.memory?.percent} threshold={limits.memory}
                       detail={result.memory?.used_mb !== undefined && result.memory.total_mb !== undefined
-                        ? `${Math.round(result.memory.used_mb / 1024)} of ${Math.round(result.memory.total_mb / 1024)} GB`
+                        ? tr('{{used}} of {{total}} GB used', { used: number(result.memory.used_mb / 1024), total: number(result.memory.total_mb / 1024) })
                         : undefined} />
-                    {/* Every mount, not the first two: the one that fills up is
-                        never the one you were watching. */}
+                    {/* Container layers and RAM filesystems are omitted by the
+                        engine; persistent mounts still get individual gauges. */}
                     {result.disks?.map(disk => (
                       <Gauge key={disk.mount} label={disk.mount} mono percent={disk.percent} threshold={limits.disk}
-                        detail={`${disk.used} of ${disk.size}, ${disk.avail} free`} />
+                        detail={tr('{{used}} of {{total}} used · {{available}} available', { used: disk.used, total: disk.size, available: disk.avail })} />
                     ))}
                   </div>
                 ) : (
@@ -192,14 +201,14 @@ export function HealthPage() {
                   // exactly what the operator wants to see.
                   <div className="px-4 pb-4">
                     <div className="rounded-lg border border-border bg-secondary px-3.5 py-3">
-                      <p className="text-sm font-bold">{result.error ?? tr("No answer")}</p>
-                      <p className="mt-1 font-mono text-xs text-muted-foreground">
+                      <p className="text-sm font-bold [overflow-wrap:anywhere]">{result.error ?? tr("No answer")}</p>
+                      <p className="mt-1 font-mono text-xs text-muted-foreground [overflow-wrap:anywhere]">
                         {result.host} {tr("· gave up after")} {result.tookMs} {tr("ms")} </p>
                     </div>
                   </div>
                 )}
 
-                <p className="mt-auto border-t border-border px-4 py-2.5 text-xs text-muted-foreground">
+                <p className="mt-auto border-t border-border px-4 py-2.5 text-xs text-muted-foreground [overflow-wrap:anywhere]">
                   {/* uptime already reads "up 42 days" — prefixing it again is
                       how you get "up up 42 days". */}
                   {result.reachable

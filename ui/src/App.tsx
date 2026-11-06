@@ -124,7 +124,7 @@ export function App() {
         <ConnectionBanner />
         <DesktopBanner />
         <SessionTabs />
-        <div className="relative flex min-h-0 flex-1 flex-col">
+        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
         {/* Sessions stay mounted and are hidden rather than unmounted. Two
             reasons, and the second is not cosmetic: switching away would lose
             the directory you had navigated to, and it would *close the shell* —
@@ -153,7 +153,7 @@ export function App() {
         ))}
 
         {activeTabId === null && (
-          <div className="flex min-h-0 flex-1 flex-col">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
             {view === 'servers' && <ServersPage />}
             {view === 'waiting' && <WaitingPage />}
             {view === 'health' && <HealthPage />}

@@ -371,5 +371,14 @@
   "{{count}} connection(s) contain plaintext credentials. ": "{{count}} 条连接包含明文凭据。",
   "Import {{count}} server(s) to edit them here. The original configuration stays unchanged.": "导入 {{count}} 台服务器后即可在此编辑，原始配置保持不变。",
   "{{count}} secret(s)": "{{count}} 项凭据",
-  "{{count}} server(s)": "{{count}} 台服务器"
+  "{{count}} server(s)": "{{count}} 台服务器",
+  " · at or above the {{v0}}% threshold": " · 已达到或超过 {{v0}}% 阈值",
+  "{{used}} of {{total}} GB used": "已用 {{used}} GB / 总计 {{total}} GB",
+  "{{used}} of {{total}} used · {{available}} available": "已用 {{used}} / 总计 {{total}} · 可用 {{available}}",
+  "Load average: {{value}}": "平均负载：{{value}}",
+  "Recheck {{server}}": "重新检查 {{server}}",
+  "Disk {{mount}}: {{value}}% used (threshold {{threshold}}%)": "磁盘 {{mount}}：已用 {{value}}%（阈值 {{threshold}}%）",
+  "Memory: {{value}}% used (threshold {{threshold}}%)": "内存：已用 {{value}}%（阈值 {{threshold}}%）",
+  "CPU: {{value}}% used (threshold {{threshold}}%)": "CPU：已用 {{value}}%（阈值 {{threshold}}%）",
+  "{{server}}: resource threshold reached": "{{server}}：资源占用达到阈值"
 }

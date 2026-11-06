@@ -371,5 +371,14 @@
   "{{count}} connection(s) contain plaintext credentials. ": "{{count}} connection(s) contain plaintext credentials. ",
   "Import {{count}} server(s) to edit them here. The original configuration stays unchanged.": "Import {{count}} server(s) to edit them here. The original configuration stays unchanged.",
   "{{count}} secret(s)": "{{count}} secret(s)",
-  "{{count}} server(s)": "{{count}} server(s)"
+  "{{count}} server(s)": "{{count}} server(s)",
+  " · at or above the {{v0}}% threshold": " · at or above the {{v0}}% threshold",
+  "{{used}} of {{total}} GB used": "{{used}} of {{total}} GB used",
+  "{{used}} of {{total}} used · {{available}} available": "{{used}} of {{total}} used · {{available}} available",
+  "Load average: {{value}}": "Load average: {{value}}",
+  "Recheck {{server}}": "Recheck {{server}}",
+  "Disk {{mount}}: {{value}}% used (threshold {{threshold}}%)": "Disk {{mount}}: {{value}}% used (threshold {{threshold}}%)",
+  "Memory: {{value}}% used (threshold {{threshold}}%)": "Memory: {{value}}% used (threshold {{threshold}}%)",
+  "CPU: {{value}}% used (threshold {{threshold}}%)": "CPU: {{value}}% used (threshold {{threshold}}%)",
+  "{{server}}: resource threshold reached": "{{server}}: resource threshold reached"
 }
