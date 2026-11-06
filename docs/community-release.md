@@ -3,6 +3,7 @@
 - 默认简体中文；在“设置 → 外观 → 语言 / Language”中即时切换 English。
 - 语言选择保存在本机，重启客户端后保留；切换语言不关闭现有终端。
 - 服务器配置、审批、文件管理、凭据库和客户端菜单支持中英文。
+- 补齐 macOS 系统子菜单的中文，包括关于、退出、编辑和窗口操作。
 - 更新地址指向 xutianhao6/mcp-ssh-manager。
 - GitHub Actions 自动构建 macOS（Apple Silicon / Intel）、Windows（x64 / ARM64）及 Linux（x64 AppImage / deb），通过界面测试和各平台安装包启动测试后发布。
 

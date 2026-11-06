@@ -1,4 +1,5 @@
 import { nativeText, nativeLanguage } from './locale.mjs';
+import { applicationMenuTemplate } from './native-menu.mjs';
 /**
  * The desktop application.
  *
@@ -313,44 +314,11 @@ function createWindow(url) {
 
 /** A menu with the shortcuts a terminal-adjacent app is expected to have. */
 function buildMenu(url) {
-  const isMac = process.platform === 'darwin';
-  Menu.setApplicationMenu(Menu.buildFromTemplate([
-    ...(isMac ? [{ role: 'appMenu', label: nativeText("SSH Manager") }] : []),
-    {
-      label: nativeText("File"),
-      submenu: [
-        {
-          label: nativeText("Open in browser"),
-          accelerator: 'CmdOrCtrl+B',
-          // The tokenised URL is genuinely useful outside the app — a second
-          // screen, a different browser, devtools you are used to.
-          click: () => void shell.openExternal(url),
-        },
-        { type: 'separator' },
-        isMac ? { role: 'close', label: nativeText("Close") } : { role: 'quit', label: nativeText("Quit") },
-      ],
-    },
-    { role: 'editMenu', label: nativeText("Edit") },
-    {
-      label: nativeText("View"),
-      submenu: [
-        { role: 'reload', label: nativeText("Reload") },
-        { role: 'forceReload', label: nativeText("Force reload") },
-        { role: 'toggleDevTools', label: nativeText("Developer tools") },
-        { type: 'separator' },
-        { role: 'resetZoom', label: nativeText("Actual size") },
-        { role: 'zoomIn', label: nativeText("Zoom in") },
-        { role: 'zoomOut', label: nativeText("Zoom out") },
-        { type: 'separator' },
-        { role: 'togglefullscreen', label: nativeText("Toggle fullscreen") },
-      ],
-    },
-    { role: 'windowMenu', label: nativeText("Window") },
-    {
-      role: 'help',
-      submenu: [{ label: nativeText("Check for Updates…"), click: () => void appUpdates.check().catch(() => { /* shown in Options → Updates */ }) }],
-    },
-  ]));
+  Menu.setApplicationMenu(Menu.buildFromTemplate(applicationMenuTemplate({
+    isMac: process.platform === 'darwin',
+    onOpenBrowser: () => void shell.openExternal(url),
+    onCheckUpdates: () => void appUpdates.check().catch(() => { /* shown in Options → Updates */ }),
+  })));
 }
 
 /**
@@ -740,7 +708,7 @@ app.whenReady().then(async () => {
     const { url } = await startControlPlane();
     if (smokeTest) {
       const { runSmokeTest } = await import('./smoke-test.mjs');
-      await runSmokeTest({ app, BrowserWindow, url, root: engineRoot(), localShellProvider });
+      await runSmokeTest({ app, BrowserWindow, Menu, url, root: engineRoot(), localShellProvider });
       app.quit();
       return;
     }

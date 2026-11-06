@@ -12,6 +12,7 @@ directories:
 files:
   - main.js
   - locale.mjs
+  - native-menu.mjs
   - native.zh-CN.json
   - local-shell.mjs
   - smoke-test.mjs
