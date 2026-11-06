@@ -1,3 +1,4 @@
+import { tr, useLocale } from '@/lib/i18n';
 /**
  * Server health, probed when you ask and never on a timer.
  *
@@ -32,6 +33,7 @@ const TEXT = { over: 'text-destructive', near: 'text-warning', ok: '' } as const
 
 function Gauge({ label, percent, detail, threshold, mono }:
   { label: string; percent?: number; detail?: string; threshold: number; mono?: boolean }) {
+  useLocale();
   if (percent === undefined) return null;
   const clamped = Math.max(0, Math.min(100, Math.round(percent)));
   const level = severity(clamped, threshold);
@@ -48,7 +50,7 @@ function Gauge({ label, percent, detail, threshold, mono }:
       {detail && (
         <p className="text-xs text-muted-foreground">
           {detail}
-          {level !== 'ok' && ` · over the ${threshold}% threshold`}
+          {level !== 'ok' && tr(" · over the {{v0}}% threshold", { v0: threshold })}
         </p>
       )}
     </div>
@@ -56,6 +58,7 @@ function Gauge({ label, percent, detail, threshold, mono }:
 }
 
 export function HealthPage() {
+  useLocale();
   const [results, setResults] = useState<HealthResult[] | null>(null);
   const [probing, setProbing] = useState(false);
   const [limits, setLimits] = useState<Thresholds>({ cpu: 80, memory: 90, disk: 85, enabled: true });
@@ -98,14 +101,12 @@ export function HealthPage() {
   return (
     <div className="flex h-full min-h-0 flex-col">
       <PageHeader
-        title="Health"
+        title={tr("Health")}
         count={results?.length}
-        hint="Probed when you ask. Nothing runs in the background."
+        hint={tr("Probed when you ask. Nothing runs in the background.")}
         actions={
           <Button className="font-bold" disabled={probing} onClick={() => void probe()}>
-            {probing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-            Check every server
-          </Button>
+            {probing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />} {tr("Check every server")} </Button>
         }
       />
 
@@ -113,22 +114,19 @@ export function HealthPage() {
         {/* The verdict before the detail: three counts you can read from the
             door, then the cards that explain them. */}
         {results !== null && results.length > 0 && (
-          <div className="mb-5 flex flex-wrap gap-2" aria-label="Summary">
+          <div className="mb-5 flex flex-wrap gap-2" aria-label={tr("Summary")}>
             <span className="inline-flex h-8 items-center gap-2 rounded-full bg-success-light px-3 text-[13px] font-bold text-success">
               <span className="h-2 w-2 rounded-full bg-success" aria-hidden="true" />
-              {reachable} reachable
-            </span>
+              {reachable} {tr("reachable")} </span>
             {warned > 0 && (
               <span className="inline-flex h-8 items-center gap-2 rounded-full bg-warning-light px-3 text-[13px] font-bold text-warning">
                 <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
-                {warned} over a threshold
-              </span>
+                {warned} {tr("over a threshold")} </span>
             )}
             {unreachable > 0 && (
               <span className="inline-flex h-8 items-center gap-2 rounded-full bg-destructive-light px-3 text-[13px] font-bold text-destructive">
                 <WifiOff className="h-3.5 w-3.5" aria-hidden="true" />
-                {unreachable} unreachable
-              </span>
+                {unreachable} {tr("unreachable")} </span>
             )}
           </div>
         )}
@@ -137,8 +135,8 @@ export function HealthPage() {
           // top under a `py-20`, which read as a different page.
           <EmptyState
             icon={HeartPulse}
-            title="Nothing probed yet"
-            hint="Each check opens one SSH connection and closes it. Press the button when you want to know."
+            title={tr("Nothing probed yet")}
+            hint={tr("Each check opens one SSH connection and closes it. Press the button when you want to know.")}
           />
         ) : (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-4">
@@ -150,12 +148,12 @@ export function HealthPage() {
                     'inline-flex h-6 shrink-0 items-center rounded-md px-2 text-xs font-bold',
                     result.reachable ? 'bg-success-light text-success' : 'bg-destructive-light text-destructive'
                   )}>
-                    {result.reachable ? 'Reachable' : 'Unreachable'}
+                    {result.reachable ? tr("Reachable") : tr("Unreachable")}
                   </span>
                   <button
                     type="button"
                     aria-label={`Recheck ${result.server}`}
-                    title="Recheck"
+                    title={tr("Recheck")}
                     disabled={probing}
                     className="ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:opacity-50"
                     onClick={() => void probe(result.server)}
@@ -178,7 +176,7 @@ export function HealthPage() {
                     )}
                     <Gauge label="CPU" percent={result.cpu?.percent} threshold={limits.cpu}
                       detail={result.load_average ? `load ${result.load_average}` : undefined} />
-                    <Gauge label="Memory" percent={result.memory?.percent} threshold={limits.memory}
+                    <Gauge label={tr("Memory")} percent={result.memory?.percent} threshold={limits.memory}
                       detail={result.memory?.used_mb !== undefined && result.memory.total_mb !== undefined
                         ? `${Math.round(result.memory.used_mb / 1024)} of ${Math.round(result.memory.total_mb / 1024)} GB`
                         : undefined} />
@@ -194,10 +192,9 @@ export function HealthPage() {
                   // exactly what the operator wants to see.
                   <div className="px-4 pb-4">
                     <div className="rounded-lg border border-border bg-secondary px-3.5 py-3">
-                      <p className="text-sm font-bold">{result.error ?? 'No answer'}</p>
+                      <p className="text-sm font-bold">{result.error ?? tr("No answer")}</p>
                       <p className="mt-1 font-mono text-xs text-muted-foreground">
-                        {result.host} · gave up after {result.tookMs} ms
-                      </p>
+                        {result.host} {tr("· gave up after")} {result.tookMs} {tr("ms")} </p>
                     </div>
                   </div>
                 )}
@@ -206,8 +203,8 @@ export function HealthPage() {
                   {/* uptime already reads "up 42 days" — prefixing it again is
                       how you get "up up 42 days". */}
                   {result.reachable
-                    ? <>{result.uptime}{` · answered in ${result.tookMs} ms`}</>
-                    : 'Recheck once the host or the network is back.'}
+                    ? <>{result.uptime}{tr(" · answered in {{v0}} ms", { v0: result.tookMs })}</>
+                    : tr("Recheck once the host or the network is back.")}
                 </p>
               </article>
             ))}

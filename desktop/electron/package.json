@@ -1,7 +1,7 @@
 {
   "name": "ssh-manager-desktop",
   "productName": "SSH Manager",
-  "version": "4.0.3",
+  "version": "4.0.4",
   "private": true,
   "description": "The SSH Manager control plane as a desktop application",
   "main": "main.js",
@@ -29,5 +29,5 @@
   "overrides": {
     "minimatch@>=7.0.0 <11.0.1": "^11.0.1"
   },
-  "homepage": "https://github.com/bvisible/mcp-ssh-manager"
+  "homepage": "https://github.com/xutianhao6/mcp-ssh-manager"
 }

@@ -28,6 +28,7 @@ permissions:
 
 jobs:
   formula:
+    if: github.repository == 'bvisible/mcp-ssh-manager'
     runs-on: macos-latest
 
     steps:
