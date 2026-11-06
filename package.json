@@ -1,6 +1,6 @@
 {
   "name": "mcp-ssh-manager",
-  "version": "4.0.3",
+  "version": "4.0.4",
   "mcpName": "io.github.bvisible/mcp-ssh-manager",
   "description": "MCP server for SSH: let AI agents (Claude Code, Codex, any MCP client) run commands, transfer files and manage servers over SSH, with human approval, an encrypted vault and a live audit trail.",
   "main": "src/index.js",
@@ -122,12 +122,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bvisible/mcp-ssh-manager.git"
+    "url": "git+https://github.com/xutianhao6/mcp-ssh-manager.git"
   },
   "bugs": {
-    "url": "https://github.com/bvisible/mcp-ssh-manager/issues"
+    "url": "https://github.com/xutianhao6/mcp-ssh-manager/issues"
   },
-  "homepage": "https://github.com/bvisible/mcp-ssh-manager#readme",
+  "homepage": "https://github.com/xutianhao6/mcp-ssh-manager#readme",
   "dependencies": {
     "@iarna/toml": "^2.2.5",
     "@modelcontextprotocol/sdk": "^1.32.1",

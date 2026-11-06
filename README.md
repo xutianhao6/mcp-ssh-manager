@@ -1,3 +1,5 @@
+> **中文 / English fork**：本 fork 默认简体中文，在 **设置 → 外观 → 语言 / Language** 中切换 English。安装包见 [GitHub Releases](https://github.com/xutianhao6/mcp-ssh-manager/releases)。使用 GitHub Actions 构建 macOS、Windows、Linux。此为基于上游 MIT 项目的社区版本，安装包未使用上游的签名证书。
+
 <p align="center">
   <img src="docs/images/icon.png" alt="" width="96">
 </p>
