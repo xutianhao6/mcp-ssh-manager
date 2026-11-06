@@ -36,9 +36,11 @@ jobs:
       - run: npm run build:ui
       - run: node tests/test-locale.js
       - run: npm test
-      - run: npx playwright install --with-deps chromium
-        working-directory: ui
+      - name: Verify runner browser
+        run: google-chrome --version
       - run: npm --prefix ui run test:e2e
+        env:
+          PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH: /usr/bin/google-chrome
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: failure()
         with:
